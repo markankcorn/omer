@@ -8,7 +8,7 @@
   <meta name="theme-color" content="#0b1026">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&family=Frank+Ruhl+Libre:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&family=Frank+Ruhl+Libre:wght@300;400;500&family=Noto+Serif+Hebrew:wght@300;400&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -25,7 +25,7 @@
       --border: rgba(200, 163, 78, 0.15);
       --font-serif: 'Cormorant Garamond', Georgia, serif;
       --font-sans: 'Inter', -apple-system, sans-serif;
-      --font-hebrew: 'Frank Ruhl Libre', 'David Libre', serif;
+      --font-hebrew: 'Noto Serif Hebrew', 'Frank Ruhl Libre', serif;
     }
 
     html { scroll-behavior: smooth; }
@@ -92,7 +92,7 @@
     .site-title-hebrew {
       font-family: var(--font-hebrew);
       font-size: 1.1rem;
-      font-weight: 500;
+      font-weight: 300;
       color: var(--gold);
       letter-spacing: 0.15em;
       text-transform: uppercase;
@@ -145,8 +145,16 @@
       text-transform: uppercase;
       letter-spacing: 0.2em;
       color: var(--gold);
-      margin-bottom: 1rem;
+      margin-bottom: 0.25rem;
       position: relative;
+    }
+
+    .date-line {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      position: relative;
+      margin-bottom: 0.25rem;
+      font-weight: 300;
     }
 
     .day-number {
@@ -155,7 +163,7 @@
       font-weight: 700;
       color: var(--gold);
       line-height: 1;
-      margin-bottom: 0.5rem;
+      margin-bottom: 2.5rem;
       position: relative;
       text-shadow: 0 0 40px var(--gold-glow), 0 0 80px rgba(200, 163, 78, 0.1);
     }
@@ -193,6 +201,7 @@
     .sefirah-hebrew {
       font-family: var(--font-hebrew);
       font-size: 1.3rem;
+      font-weight: 300;
       color: var(--gold-light);
       margin-bottom: 0.2rem;
     }
@@ -253,6 +262,7 @@
     .card-title-hebrew {
       font-family: var(--font-hebrew);
       font-size: 1rem;
+      font-weight: 300;
       color: var(--gold);
       margin-bottom: 1.25rem;
     }
@@ -267,6 +277,7 @@
     .hebrew-text {
       font-family: var(--font-hebrew);
       font-size: 1.35rem;
+      font-weight: 300;
       line-height: 2;
       color: var(--text-bright);
       direction: rtl;
@@ -390,6 +401,7 @@
 
     <section class="count-hero animate-in" id="count-hero">
       <div class="count-status" id="count-status">Loading...</div>
+      <div class="date-line" id="date-line"></div>
       <div class="day-number loading" id="day-number">&mdash;</div>
       <div class="day-label" id="day-label"></div>
       <div class="week-breakdown" id="week-breakdown"></div>
@@ -410,7 +422,7 @@
     </section>
 
     <section class="card animate-in" id="count-card" style="display:none">
-      <div class="card-title">Tonight's Count</div>
+      <div class="card-title">Tonight&rsquo;s Count</div>
       <div class="card-title-hebrew">הַסְּפִירָה שֶׁל הַלַּיְלָה</div>
       <div class="text-label">Hebrew</div>
       <div class="hebrew-text" id="count-hebrew"></div>
@@ -629,6 +641,7 @@
         const dayNumberEl = document.getElementById('day-number');
         const dayLabelEl = document.getElementById('day-label');
         const countStatusEl = document.getElementById('count-status');
+        const dateLineEl = document.getElementById('date-line');
         const weekBreakdownEl = document.getElementById('week-breakdown');
         const sefirahSection = document.getElementById('sefirah-section');
         const countCard = document.getElementById('count-card');
@@ -636,6 +649,7 @@
 
         if (info.status === 'before') {
           countStatusEl.textContent = 'The Omer begins soon';
+          dateLineEl.textContent = '';
           dayNumberEl.textContent = info.daysUntil;
           dayNumberEl.classList.remove('active');
           dayLabelEl.textContent = 'day' + (info.daysUntil === 1 ? '' : 's') + ' until counting begins';
@@ -649,6 +663,7 @@
 
         if (info.status === 'after') {
           countStatusEl.textContent = 'Chag Sameach!';
+          dateLineEl.textContent = '';
           dayNumberEl.textContent = '✦';
           dayNumberEl.classList.remove('active');
           dayNumberEl.style.fontSize = '4rem';
@@ -666,6 +681,10 @@
         const rem = day % 7;
 
         countStatusEl.textContent = info.isAfterSunset ? 'Tonight\u2019s Count' : 'Today\u2019s Count';
+        const opts = { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' };
+        const dateStr = now.toLocaleDateString('en-US', opts);
+        const sunsetNote = info.isAfterSunset ? 'after sunset' : 'before sunset';
+        dateLineEl.textContent = 'For ' + dateStr + ' ' + sunsetNote;
         dayNumberEl.textContent = day;
         dayNumberEl.classList.add('active');
         dayNumberEl.classList.remove('loading');
