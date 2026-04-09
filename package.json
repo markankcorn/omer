@@ -1,0 +1,14 @@
+{
+  "name": "omercount",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Omer counting website - omercount.com",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "preview": "wrangler dev --remote"
+  },
+  "devDependencies": {
+    "wrangler": "^4"
+  }
+}

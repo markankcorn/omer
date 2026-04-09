@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Omer Count | ספירת העומר</title>
+  <meta name="description" content="Count the Omer nightly from Passover to Shavuot. Blessing, transliteration, and daily count in Hebrew and English.">
+  <meta name="theme-color" content="#0b1026">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&family=Frank+Ruhl+Libre:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg-deep: #0b1026;
+      --bg-mid: #131836;
+      --bg-card: rgba(22, 28, 62, 0.7);
+      --gold: #c8a34e;
+      --gold-light: #e8d5a3;
+      --gold-glow: rgba(200, 163, 78, 0.25);
+      --text: #e8e8f0;
+      --text-dim: #9898b0;
+      --text-bright: #ffffff;
+      --border: rgba(200, 163, 78, 0.15);
+      --font-serif: 'Cormorant Garamond', Georgia, serif;
+      --font-sans: 'Inter', -apple-system, sans-serif;
+      --font-hebrew: 'Frank Ruhl Libre', 'David Libre', serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg-deep);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* Starfield background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.4), transparent),
+        radial-gradient(1px 1px at 30% 60%, rgba(255,255,255,0.3), transparent),
+        radial-gradient(1px 1px at 50% 10%, rgba(255,255,255,0.25), transparent),
+        radial-gradient(1px 1px at 70% 40%, rgba(255,255,255,0.35), transparent),
+        radial-gradient(1px 1px at 90% 80%, rgba(255,255,255,0.3), transparent),
+        radial-gradient(1px 1px at 15% 85%, rgba(255,255,255,0.2), transparent),
+        radial-gradient(1px 1px at 45% 50%, rgba(255,255,255,0.3), transparent),
+        radial-gradient(1px 1px at 75% 15%, rgba(255,255,255,0.25), transparent),
+        radial-gradient(1px 1px at 85% 55%, rgba(255,255,255,0.2), transparent),
+        radial-gradient(1.5px 1.5px at 25% 35%, rgba(200,163,78,0.3), transparent),
+        radial-gradient(1.5px 1.5px at 65% 70%, rgba(200,163,78,0.25), transparent),
+        radial-gradient(1.5px 1.5px at 55% 90%, rgba(200,163,78,0.2), transparent);
+      background-size: 200px 200px, 300px 250px, 250px 300px, 350px 200px, 200px 350px,
+                       300px 300px, 250px 250px, 350px 350px, 180px 280px,
+                       400px 400px, 350px 300px, 280px 350px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Gradient overlay */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(30, 40, 100, 0.3) 0%, transparent 60%),
+                  radial-gradient(ellipse at 50% 100%, rgba(15, 10, 40, 0.5) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 4rem;
+    }
+
+    /* Header */
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .site-title-hebrew {
+      font-family: var(--font-hebrew);
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: var(--gold);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 0.25rem;
+    }
+
+    .site-title {
+      font-family: var(--font-serif);
+      font-size: 2.4rem;
+      font-weight: 700;
+      color: var(--text-bright);
+      letter-spacing: 0.02em;
+    }
+
+    .site-subtitle {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      margin-top: 0.5rem;
+      font-weight: 300;
+    }
+
+    /* Count Display */
+    .count-hero {
+      text-align: center;
+      padding: 3rem 1.5rem;
+      margin-bottom: 2.5rem;
+      border-radius: 20px;
+      background: linear-gradient(135deg, rgba(30, 35, 70, 0.6), rgba(15, 20, 50, 0.8));
+      border: 1px solid var(--border);
+      backdrop-filter: blur(10px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .count-hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle at center, var(--gold-glow), transparent 50%);
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    .count-status {
+      font-size: 0.8rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--gold);
+      margin-bottom: 1rem;
+      position: relative;
+    }
+
+    .day-number {
+      font-family: var(--font-serif);
+      font-size: 7rem;
+      font-weight: 700;
+      color: var(--gold);
+      line-height: 1;
+      margin-bottom: 0.5rem;
+      position: relative;
+      text-shadow: 0 0 40px var(--gold-glow), 0 0 80px rgba(200, 163, 78, 0.1);
+    }
+
+    .day-label {
+      font-family: var(--font-serif);
+      font-size: 1.5rem;
+      font-weight: 400;
+      color: var(--text);
+      position: relative;
+      margin-bottom: 0.75rem;
+    }
+
+    .week-breakdown {
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      position: relative;
+    }
+
+    .sefirah {
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      position: relative;
+    }
+
+    .sefirah-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--text-dim);
+      margin-bottom: 0.4rem;
+    }
+
+    .sefirah-hebrew {
+      font-family: var(--font-hebrew);
+      font-size: 1.3rem;
+      color: var(--gold-light);
+      margin-bottom: 0.2rem;
+    }
+
+    .sefirah-english {
+      font-family: var(--font-serif);
+      font-size: 1rem;
+      font-style: italic;
+      color: var(--text-dim);
+    }
+
+    /* Progress bar */
+    .progress-container {
+      margin-top: 1.5rem;
+      position: relative;
+    }
+
+    .progress-track {
+      height: 3px;
+      background: rgba(200, 163, 78, 0.1);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold), var(--gold-light));
+      border-radius: 2px;
+      transition: width 1s ease;
+    }
+
+    .progress-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 0.4rem;
+      font-size: 0.7rem;
+      color: var(--text-dim);
+    }
+
+    /* Cards */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+      backdrop-filter: blur(10px);
+    }
+
+    .card-title {
+      font-family: var(--font-serif);
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: var(--text-bright);
+      margin-bottom: 0.25rem;
+    }
+
+    .card-title-hebrew {
+      font-family: var(--font-hebrew);
+      font-size: 1rem;
+      color: var(--gold);
+      margin-bottom: 1.25rem;
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 1.25rem 0;
+    }
+
+    /* Blessing & Count text */
+    .hebrew-text {
+      font-family: var(--font-hebrew);
+      font-size: 1.35rem;
+      line-height: 2;
+      color: var(--text-bright);
+      direction: rtl;
+      text-align: right;
+    }
+
+    .transliteration-text {
+      font-family: var(--font-serif);
+      font-size: 1.05rem;
+      font-style: italic;
+      color: var(--gold-light);
+      line-height: 1.8;
+      margin-top: 0.75rem;
+    }
+
+    .english-text {
+      font-size: 0.95rem;
+      color: var(--text-dim);
+      line-height: 1.7;
+      margin-top: 0.75rem;
+    }
+
+    .text-label {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--text-dim);
+      margin-bottom: 0.3rem;
+      margin-top: 1rem;
+    }
+
+    .text-label:first-child { margin-top: 0; }
+
+    /* Explanation */
+    .explanation p {
+      font-size: 0.95rem;
+      line-height: 1.8;
+      color: var(--text);
+      margin-bottom: 1rem;
+    }
+
+    .explanation p:last-child { margin-bottom: 0; }
+
+    /* Not-active states */
+    .off-season {
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .off-season-message {
+      font-family: var(--font-serif);
+      font-size: 1.3rem;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+    }
+
+    .off-season-detail {
+      font-size: 0.9rem;
+      color: var(--text-dim);
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+    }
+
+    footer p {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+    }
+
+    /* Loading */
+    .loading .day-number { opacity: 0.3; }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .container { padding: 2rem 1rem 3rem; }
+      .site-title { font-size: 1.8rem; }
+      .day-number { font-size: 5rem; }
+      .day-label { font-size: 1.2rem; }
+      .card { padding: 1.5rem; }
+      .hebrew-text { font-size: 1.2rem; }
+    }
+
+    /* Fade-in animation */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-in {
+      animation: fadeInUp 0.6s ease forwards;
+    }
+
+    .animate-in:nth-child(2) { animation-delay: 0.1s; }
+    .animate-in:nth-child(3) { animation-delay: 0.2s; }
+    .animate-in:nth-child(4) { animation-delay: 0.3s; }
+    .animate-in:nth-child(5) { animation-delay: 0.4s; }
+
+    /* Gentle pulse for the day number */
+    @keyframes gentlePulse {
+      0%, 100% { text-shadow: 0 0 40px var(--gold-glow), 0 0 80px rgba(200,163,78,0.1); }
+      50% { text-shadow: 0 0 50px var(--gold-glow), 0 0 100px rgba(200,163,78,0.15); }
+    }
+
+    .day-number.active {
+      animation: gentlePulse 4s ease-in-out infinite;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="animate-in">
+      <div class="site-title-hebrew">ספירת העומר</div>
+      <h1 class="site-title">Counting the Omer</h1>
+      <p class="site-subtitle">From Passover to Shavuot</p>
+    </header>
+
+    <section class="count-hero animate-in" id="count-hero">
+      <div class="count-status" id="count-status">Loading...</div>
+      <div class="day-number loading" id="day-number">&mdash;</div>
+      <div class="day-label" id="day-label"></div>
+      <div class="week-breakdown" id="week-breakdown"></div>
+      <div class="sefirah" id="sefirah-section" style="display:none">
+        <div class="sefirah-label">Sefirah of the Day</div>
+        <div class="sefirah-hebrew" id="sefirah-hebrew"></div>
+        <div class="sefirah-english" id="sefirah-english"></div>
+      </div>
+      <div class="progress-container" id="progress-container" style="display:none">
+        <div class="progress-track">
+          <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+        </div>
+        <div class="progress-labels">
+          <span>Pesach</span>
+          <span>Shavuot</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="card animate-in" id="count-card" style="display:none">
+      <div class="card-title">Tonight's Count</div>
+      <div class="card-title-hebrew">הַסְּפִירָה שֶׁל הַלַּיְלָה</div>
+      <div class="text-label">Hebrew</div>
+      <div class="hebrew-text" id="count-hebrew"></div>
+      <div class="text-label">Transliteration</div>
+      <div class="transliteration-text" id="count-translit"></div>
+      <div class="text-label">English</div>
+      <div class="english-text" id="count-english"></div>
+    </section>
+
+    <section class="card animate-in">
+      <div class="card-title">The Blessing</div>
+      <div class="card-title-hebrew">הַבְּרָכָה</div>
+      <div class="text-label">Hebrew</div>
+      <div class="hebrew-text">בָּרוּךְ אַתָּה יְיָ אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם, אֲשֶׁר קִדְּשָׁנוּ בְּמִצְוֹתָיו, וְצִוָּנוּ עַל סְפִירַת הָעֹמֶר.</div>
+      <div class="text-label">Transliteration</div>
+      <div class="transliteration-text">Baruch atah Adonai, Eloheinu melech ha-olam, asher kid'shanu b'mitzvotav, v'tzivanu al sefirat ha-omer.</div>
+      <div class="text-label">English</div>
+      <div class="english-text">Blessed are You, Lord our God, King of the Universe, who has sanctified us with His commandments and commanded us concerning the counting of the Omer.</div>
+    </section>
+
+    <section class="card explanation animate-in">
+      <div class="card-title">About the Omer</div>
+      <div class="card-title-hebrew">אודות ספירת העומר</div>
+      <p>The Counting of the Omer (<em>Sefirat HaOmer</em>) is a Jewish practice that spans 49 days, linking the holidays of Passover (<em>Pesach</em>) and Shavuot. Beginning on the second night of Passover, Jews count each of the seven weeks, reciting a special blessing followed by the day's count each evening after nightfall. The practice originates in the Torah (Leviticus 23:15&ndash;16), where the Israelites were commanded to count seven complete weeks from the bringing of the <em>omer</em>&mdash;the first sheaf of barley&mdash;offered in the Temple, until the festival of Shavuot, when an offering of wheat was brought.</p>
+      <p>This counting period represents a spiritual journey from the physical liberation of the Exodus (Passover) to the spiritual revelation of receiving the Torah at Mount Sinai (Shavuot). In the Kabbalistic tradition, each of the 49 days corresponds to a unique pairing of seven divine attributes (<em>sefirot</em>), offering an opportunity for personal reflection and inner growth. Many also observe certain mourning customs during parts of this period, in remembrance of a plague that struck the students of Rabbi Akiva.</p>
+    </section>
+
+    <footer>
+      <p>omercount.com</p>
+    </footer>
+  </div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      // ── Sefirot Data ──
+      const SEFIROT = [
+        { he: 'חֶסֶד', en: 'Lovingkindness', tr: 'Chesed' },
+        { he: 'גְּבוּרָה', en: 'Discipline', tr: 'Gevurah' },
+        { he: 'תִּפְאֶרֶת', en: 'Harmony', tr: 'Tiferet' },
+        { he: 'נֶצַח', en: 'Endurance', tr: 'Netzach' },
+        { he: 'הוֹד', en: 'Humility', tr: 'Hod' },
+        { he: 'יְסוֹד', en: 'Foundation', tr: 'Yesod' },
+        { he: 'מַלְכוּת', en: 'Sovereignty', tr: 'Malchut' }
+      ];
+
+      // ── Hebrew number data for Omer count ──
+      // Ones (1-9) in construct/counting form
+      const HEB_ONES = ['', 'אֶחָד', 'שְׁנֵי', 'שְׁלֹשָׁה', 'אַרְבָּעָה', 'חֲמִשָּׁה', 'שִׁשָּׁה', 'שִׁבְעָה', 'שְׁמוֹנָה', 'תִּשְׁעָה'];
+      const TR_ONES  = ['', 'echad', 'shnei', 'shlosha', "arba'a", 'chamisha', 'shisha', "shiv'a", 'shmonah', "tish'a"];
+
+      // Ones for 20+ (absolute form for shnayim)
+      const HEB_ONES_ABS = ['', 'אֶחָד', 'שְׁנַיִם', 'שְׁלֹשָׁה', 'אַרְבָּעָה', 'חֲמִשָּׁה', 'שִׁשָּׁה', 'שִׁבְעָה', 'שְׁמוֹנָה', 'תִּשְׁעָה'];
+      const TR_ONES_ABS  = ['', 'echad', 'shnayim', 'shlosha', "arba'a", 'chamisha', 'shisha', "shiv'a", 'shmonah', "tish'a"];
+
+      // Teens (10-19)
+      const HEB_TEENS = ['עֲשָׂרָה', 'אַחַד עָשָׂר', 'שְׁנֵים עָשָׂר', 'שְׁלֹשָׁה עָשָׂר', 'אַרְבָּעָה עָשָׂר', 'חֲמִשָּׁה עָשָׂר', 'שִׁשָּׁה עָשָׂר', 'שִׁבְעָה עָשָׂר', 'שְׁמוֹנָה עָשָׂר', 'תִּשְׁעָה עָשָׂר'];
+      const TR_TEENS  = ['asara', 'achad asar', 'shneim asar', 'shlosha asar', "arba'a asar", 'chamisha asar', 'shisha asar', "shiv'a asar", 'shmonah asar', "tish'a asar"];
+
+      // Tens (20, 30, 40)
+      const HEB_TENS = { 20: 'עֶשְׂרִים', 30: 'שְׁלֹשִׁים', 40: 'אַרְבָּעִים' };
+      const TR_TENS  = { 20: 'esrim', 30: 'shloshim', 40: "arba'im" };
+      // Connector before tens
+      const HEB_CONN = { 20: 'וְ', 30: 'וּ', 40: 'וְ' };
+      const TR_CONN  = { 20: "v'", 30: 'u', 40: "v'" };
+
+      function hebrewNumber(n) {
+        if (n <= 9) return { he: HEB_ONES[n], tr: TR_ONES[n] };
+        if (n <= 19) return { he: HEB_TEENS[n - 10], tr: TR_TEENS[n - 10] };
+        const t = Math.floor(n / 10) * 10;
+        const o = n % 10;
+        if (o === 0) return { he: HEB_TENS[t], tr: TR_TENS[t] };
+        return {
+          he: HEB_ONES_ABS[o] + ' ' + HEB_CONN[t] + HEB_TENS[t],
+          tr: TR_ONES_ABS[o] + ' ' + TR_CONN[t] + TR_TENS[t]
+        };
+      }
+
+      // Week numbers for the "shehem" clause
+      const HEB_WEEKS = ['', 'שָׁבוּעַ אֶחָד', 'שְׁנֵי שָׁבוּעוֹת', 'שְׁלֹשָׁה שָׁבוּעוֹת', 'אַרְבָּעָה שָׁבוּעוֹת', 'חֲמִשָּׁה שָׁבוּעוֹת', 'שִׁשָּׁה שָׁבוּעוֹת', 'שִׁבְעָה שָׁבוּעוֹת'];
+      const TR_WEEKS  = ['', 'shavua echad', 'shnei shavuot', 'shlosha shavuot', "arba'a shavuot", 'chamisha shavuot', 'shisha shavuot', "shiv'a shavuot"];
+
+      // Remainder days with leading vav
+      const HEB_REM_DAYS = ['', 'וְיוֹם אֶחָד', 'וּשְׁנֵי יָמִים', 'וּשְׁלֹשָׁה יָמִים', 'וְאַרְבָּעָה יָמִים', 'וַחֲמִשָּׁה יָמִים', 'וְשִׁשָּׁה יָמִים'];
+      const TR_REM_DAYS  = ['', "v'yom echad", 'ushnei yamim', 'ushlosha yamim', "v'arba'a yamim", 'vachamisha yamim', "v'shisha yamim"];
+
+      function buildCountText(day) {
+        const num = hebrewNumber(day);
+        const weeks = Math.floor(day / 7);
+        const rem = day % 7;
+
+        // Hebrew
+        let he, tr, en;
+
+        // "HaYom [number] yom/yamim"
+        if (day === 1) {
+          he = 'הַיּוֹם יוֹם אֶחָד לָעֹמֶר';
+          tr = "HaYom yom echad la'Omer.";
+          en = 'Today is one day of the Omer.';
+        } else {
+          const yamim = day >= 11 ? 'יוֹם' : 'יָמִים';
+          const yamimTr = day >= 11 ? 'yom' : 'yamim';
+
+          he = 'הַיּוֹם ' + num.he + ' ' + yamim;
+          tr = 'HaYom ' + num.tr + ' ' + yamimTr;
+          en = 'Today is ' + day + ' days';
+
+          if (weeks >= 1) {
+            he += ', שֶׁהֵם ' + HEB_WEEKS[weeks];
+            tr += ', shehem ' + TR_WEEKS[weeks];
+            en += ', which is ' + weeks + ' week' + (weeks > 1 ? 's' : '');
+
+            if (rem > 0) {
+              he += ' ' + HEB_REM_DAYS[rem];
+              tr += ' ' + TR_REM_DAYS[rem];
+              en += ' and ' + rem + ' day' + (rem > 1 ? 's' : '');
+            }
+          }
+
+          he += ' לָעֹמֶר.';
+          tr += " la'Omer.";
+          en += ' of the Omer.';
+        }
+
+        return { he, tr, en };
+      }
+
+      // ── Omer Date Calculation ──
+      // Uses Intl.DateTimeFormat with the Hebrew calendar to find 16 Nisan.
+      // The Intl API maps Gregorian dates to Hebrew dates using midnight boundaries.
+      // 16 Nisan (Intl) corresponds to the Gregorian date whose daytime is 16 Nisan.
+      // The actual Omer count begins at sunset the evening BEFORE that Gregorian date.
+
+      function findNisan16Gregorian(year) {
+        const fmt = new Intl.DateTimeFormat('en-u-ca-hebrew', { month: 'long', day: 'numeric' });
+        // Passover falls between late March and late April
+        for (let m = 2; m <= 4; m++) {
+          for (let d = 1; d <= 31; d++) {
+            const date = new Date(year, m, d);
+            if (isNaN(date.getTime())) continue;
+            if (date.getMonth() !== m) continue; // overflow
+            const str = fmt.format(date);
+            if (str === '16 Nisan') return date;
+          }
+        }
+        return null;
+      }
+
+      function getOmerInfo(now) {
+        const year = now.getFullYear();
+        // Try current year and previous year (in case we're in Jan-March after a late Omer)
+        let nisan16 = findNisan16Gregorian(year);
+
+        // The Omer counting sunset-date: one day before the Intl 16-Nisan date
+        // (because 16 Nisan starts at sunset on that prior evening)
+        const omerSunsetStart = new Date(nisan16);
+        omerSunsetStart.setDate(omerSunsetStart.getDate() - 1);
+
+        // Approximate sunset at 7:30 PM local time
+        // TODO: use actual sunset time from zip code
+        const APPROX_SUNSET_HOUR = 19.5;
+        const currentHour = now.getHours() + now.getMinutes() / 60;
+        const isAfterSunset = currentHour >= APPROX_SUNSET_HOUR;
+
+        // Days since Omer sunset-start date
+        const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const diffMs = todayMidnight.getTime() - omerSunsetStart.getTime();
+        const diffDays = Math.round(diffMs / (86400000));
+
+        let omerDay;
+        if (isAfterSunset) {
+          omerDay = diffDays + 1;
+        } else {
+          omerDay = diffDays;
+        }
+
+        // What day to show for "tonight's count"
+        let tonightDay;
+        if (isAfterSunset) {
+          tonightDay = diffDays + 1;
+        } else {
+          tonightDay = diffDays + 1; // tonight = the upcoming sunset
+        }
+
+        // Clamp and determine status
+        let status;
+        if (omerDay < 1) {
+          status = 'before';
+          // Compute days until Omer starts
+          const startDate = new Date(omerSunsetStart);
+          const daysUntil = Math.ceil((startDate.getTime() - todayMidnight.getTime()) / 86400000);
+          return { status, daysUntil, omerStartDate: omerSunsetStart };
+        } else if (omerDay > 49) {
+          status = 'after';
+          return { status };
+        } else {
+          status = 'active';
+          return {
+            status,
+            omerDay,
+            tonightDay: Math.min(tonightDay, 49),
+            isAfterSunset,
+            weeks: Math.floor(omerDay / 7),
+            remainderDays: omerDay % 7,
+            totalProgress: omerDay / 49
+          };
+        }
+      }
+
+      // ── Render ──
+      function render() {
+        const now = new Date();
+        const info = getOmerInfo(now);
+
+        const dayNumberEl = document.getElementById('day-number');
+        const dayLabelEl = document.getElementById('day-label');
+        const countStatusEl = document.getElementById('count-status');
+        const weekBreakdownEl = document.getElementById('week-breakdown');
+        const sefirahSection = document.getElementById('sefirah-section');
+        const countCard = document.getElementById('count-card');
+        const progressContainer = document.getElementById('progress-container');
+
+        if (info.status === 'before') {
+          countStatusEl.textContent = 'The Omer begins soon';
+          dayNumberEl.textContent = info.daysUntil;
+          dayNumberEl.classList.remove('active');
+          dayLabelEl.textContent = 'day' + (info.daysUntil === 1 ? '' : 's') + ' until counting begins';
+          const opts = { weekday: 'long', month: 'long', day: 'numeric' };
+          weekBreakdownEl.textContent = 'Starting at sunset on ' + info.omerStartDate.toLocaleDateString('en-US', opts);
+          sefirahSection.style.display = 'none';
+          countCard.style.display = 'none';
+          progressContainer.style.display = 'none';
+          return;
+        }
+
+        if (info.status === 'after') {
+          countStatusEl.textContent = 'Chag Sameach!';
+          dayNumberEl.textContent = '✦';
+          dayNumberEl.classList.remove('active');
+          dayNumberEl.style.fontSize = '4rem';
+          dayLabelEl.textContent = 'The Omer count has concluded';
+          weekBreakdownEl.textContent = 'Wishing you a joyful Shavuot';
+          sefirahSection.style.display = 'none';
+          countCard.style.display = 'none';
+          progressContainer.style.display = 'none';
+          return;
+        }
+
+        // Active Omer
+        const day = info.omerDay;
+        const weeks = Math.floor(day / 7);
+        const rem = day % 7;
+
+        countStatusEl.textContent = info.isAfterSunset ? 'Tonight\u2019s Count' : 'Today\u2019s Count';
+        dayNumberEl.textContent = day;
+        dayNumberEl.classList.add('active');
+        dayNumberEl.classList.remove('loading');
+        dayLabelEl.textContent = 'Day ' + day + ' of the Omer';
+
+        // Week breakdown
+        if (weeks > 0) {
+          let wb = weeks + ' week' + (weeks > 1 ? 's' : '');
+          if (rem > 0) wb += ' and ' + rem + ' day' + (rem > 1 ? 's' : '');
+          weekBreakdownEl.textContent = wb;
+        } else {
+          weekBreakdownEl.textContent = day + ' day' + (day > 1 ? 's' : '');
+        }
+
+        // Sefirah
+        const weekIdx = Math.floor((day - 1) / 7); // 0-6
+        const dayIdx = (day - 1) % 7; // 0-6
+        const weekSefirah = SEFIROT[weekIdx];
+        const daySefirah = SEFIROT[dayIdx];
+
+        sefirahSection.style.display = 'block';
+        document.getElementById('sefirah-hebrew').textContent = daySefirah.he + ' שֶׁבְּ' + weekSefirah.he;
+        document.getElementById('sefirah-english').textContent = daySefirah.en + ' within ' + weekSefirah.en;
+
+        // Progress
+        progressContainer.style.display = 'block';
+        document.getElementById('progress-fill').style.width = (info.totalProgress * 100).toFixed(1) + '%';
+
+        // Count card
+        countCard.style.display = 'block';
+        const tonight = info.isAfterSunset ? day : day; // during daytime, show tonight's (same day being counted)
+        const countText = buildCountText(tonight);
+        document.getElementById('count-hebrew').textContent = countText.he;
+        document.getElementById('count-translit').textContent = countText.tr;
+        document.getElementById('count-english').textContent = countText.en;
+      }
+
+      // Initial render
+      render();
+
+      // Re-render every minute to handle sunset transitions
+      setInterval(render, 60000);
+    })();
+  </script>
+</body>
+</html>
