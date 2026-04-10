@@ -781,9 +781,31 @@
         titleHe.textContent = SEFIROT[dayIdx].he + ' שֶׁבְּ' + SEFIROT[weekIdx].he;
 
         // Convert paragraphs
+        // Smartypants-style typography
+        function smartQuotes(s) {
+          // Double quotes
+          s = s.replace(/"(\s|$)/g, '\u201d$1');   // closing "
+          s = s.replace(/(^|\s)"/g, '$1\u201c');    // opening "
+          s = s.replace(/"/g, '\u201d');             // remaining default to closing
+          // Single quotes / apostrophes
+          s = s.replace(/'(\s|$)/g, '\u2019$1');    // closing '
+          s = s.replace(/(^|\s)'/g, '$1\u2018');    // opening '
+          s = s.replace(/'/g, '\u2019');             // apostrophes
+          // Dashes
+          s = s.replace(/---/g, '\u2014');           // em dash
+          s = s.replace(/--/g, '\u2013');            // en dash
+          // Ellipsis
+          s = s.replace(/\.\.\./g, '\u2026');
+          return s;
+        }
+
         body.innerHTML = text.split('\n\n')
           .filter(p => p.trim())
-          .map(p => '<p>' + p.replace(/\*([^*]+)\*/g, '<em>$1</em>').replace(/—/g, '\u2014') + '</p>')
+          .map(p => {
+            p = p.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+            p = smartQuotes(p);
+            return '<p>' + p + '</p>';
+          })
           .join('');
 
         card.style.display = 'block';
