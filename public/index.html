@@ -286,14 +286,17 @@
     }
 
     .meditation-body {
-      font-family: var(--font-serif);
-      font-size: 1.05rem;
-      line-height: 1.9;
+      font-size: 0.95rem;
+      line-height: 1.8;
       color: var(--text);
     }
 
     .meditation-body p {
-      margin-bottom: 1rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .meditation-body p:first-child {
+      margin-top: 1.25rem;
     }
 
     .meditation-body p:last-child {
@@ -423,6 +426,7 @@
     }
 
     .explanation p:last-child { margin-bottom: 0; }
+    .explanation .card-body p:first-child { margin-top: 1.25rem; }
 
     /* Not-active states */
     .off-season {
@@ -526,12 +530,12 @@
     </section>
 
     <section class="card card-collapsible animate-in" id="blessing-card">
-      <div class="card-header" id="blessing-toggle">
+      <div class="card-header" data-toggle="blessing">
         <div>
           <div class="card-title">The Blessing</div>
           <div class="card-title-hebrew">הַבְּרָכָה</div>
         </div>
-        <div class="collapse-icon" id="collapse-icon">&#x25BC;</div>
+        <div class="collapse-icon">&#x25BC;</div>
       </div>
       <div class="card-body collapsed" id="blessing-body">
         <div class="kavvanah">
@@ -548,26 +552,44 @@
       </div>
     </section>
 
-    <section class="card animate-in" id="count-card" style="display:none">
-      <div class="card-title">Tonight&rsquo;s Count</div>
-      <div class="card-title-hebrew">הַסְּפִירָה שֶׁל הַלַּיְלָה</div>
-      <div class="hebrew-text" id="count-hebrew"></div>
-      <div class="transliteration-text" id="count-translit"></div>
-      <div class="english-text" id="count-english"></div>
+    <section class="card card-collapsible animate-in" id="count-card" style="display:none">
+      <div class="card-header" data-toggle="count">
+        <div>
+          <div class="card-title">Tonight&rsquo;s Count</div>
+          <div class="card-title-hebrew">הַסְּפִירָה שֶׁל הַלַּיְלָה</div>
+        </div>
+        <div class="collapse-icon">&#x25BC;</div>
+      </div>
+      <div class="card-body collapsed" id="count-body">
+        <div class="hebrew-text" id="count-hebrew"></div>
+        <div class="transliteration-text" id="count-translit"></div>
+        <div class="english-text" id="count-english"></div>
+      </div>
     </section>
 
-    <section class="card animate-in" id="meditation-card" style="display:none">
-      <div class="card-title">Meditation</div>
-      <div class="card-title-hebrew" id="meditation-title-hebrew"></div>
-      <div class="meditation-body" id="meditation-body"></div>
+    <section class="card card-collapsible animate-in" id="meditation-card" style="display:none">
+      <div class="card-header" data-toggle="meditation">
+        <div>
+          <div class="card-title">Meditation</div>
+          <div class="card-title-hebrew" id="meditation-title-hebrew"></div>
+        </div>
+        <div class="collapse-icon">&#x25BC;</div>
+      </div>
+      <div class="card-body collapsed meditation-body" id="meditation-body"></div>
     </section>
 
-
-    <section class="card explanation animate-in">
-      <div class="card-title">About the Omer</div>
-      <div class="card-title-hebrew">אודות ספירת העומר</div>
-      <p>The Counting of the Omer (<em>Sefirat HaOmer</em>) is a Jewish practice that spans 49 days, linking the holidays of Passover (<em>Pesach</em>) and Shavuot. Beginning on the second night of Passover, Jews count each of the seven weeks, reciting a special blessing followed by the day's count each evening after nightfall. The practice originates in the Torah (Leviticus 23:15&ndash;16), where the Israelites were commanded to count seven complete weeks from the bringing of the <em>omer</em>&mdash;the first sheaf of barley&mdash;offered in the Temple, until the festival of Shavuot, when an offering of wheat was brought.</p>
-      <p>This counting period represents a spiritual journey from the physical liberation of the Exodus (Passover) to the spiritual revelation of receiving the Torah at Mount Sinai (Shavuot). In the Kabbalistic tradition, each of the 49 days corresponds to a unique pairing of seven divine attributes (<em>sefirot</em>), offering an opportunity for personal reflection and inner growth. Many also observe certain mourning customs during parts of this period, in remembrance of a plague that struck the students of Rabbi Akiva.</p>
+    <section class="card card-collapsible explanation animate-in">
+      <div class="card-header" data-toggle="about">
+        <div>
+          <div class="card-title">About the Omer</div>
+          <div class="card-title-hebrew">אודות ספירת העומר</div>
+        </div>
+        <div class="collapse-icon">&#x25BC;</div>
+      </div>
+      <div class="card-body collapsed" id="about-body">
+        <p>The Counting of the Omer (<em>Sefirat HaOmer</em>) is a Jewish practice that spans 49 days, linking the holidays of Passover (<em>Pesach</em>) and Shavuot. Beginning on the second night of Passover, Jews count each of the seven weeks, reciting a special blessing followed by the day&rsquo;s count each evening after nightfall. The practice originates in the Torah (Leviticus 23:15&ndash;16), where the Israelites were commanded to count seven complete weeks from the bringing of the <em>omer</em>&mdash;the first sheaf of barley&mdash;offered in the Temple, until the festival of Shavuot, when an offering of wheat was brought.</p>
+        <p>This counting period represents a spiritual journey from the physical liberation of the Exodus (Passover) to the spiritual revelation of receiving the Torah at Mount Sinai (Shavuot). In the Kabbalistic tradition, each of the 49 days corresponds to a unique pairing of seven divine attributes (<em>sefirot</em>), offering an opportunity for personal reflection and inner growth. Many also observe certain mourning customs during parts of this period, in remembrance of a plague that struck the students of Rabbi Akiva.</p>
+      </div>
     </section>
 
     <footer>
@@ -1055,12 +1077,14 @@
         }
       })();
 
-      // Blessing card toggle
-      document.getElementById('blessing-toggle').addEventListener('click', function() {
-        const card = document.getElementById('blessing-card');
-        const body = document.getElementById('blessing-body');
-        card.classList.toggle('open');
-        body.classList.toggle('collapsed');
+      // Collapsible card toggles
+      document.querySelectorAll('.card-header').forEach(function(header) {
+        header.addEventListener('click', function() {
+          const card = header.closest('.card-collapsible');
+          const body = card.querySelector('.card-body');
+          card.classList.toggle('open');
+          body.classList.toggle('collapsed');
+        });
       });
     })();
   </script>
