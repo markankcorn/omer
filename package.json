@@ -4,8 +4,9 @@
   "private": true,
   "description": "Omer counting website - omercount.com",
   "scripts": {
-    "dev": "wrangler dev",
-    "deploy": "wrangler deploy",
+    "build:meditations": "node scripts/build-meditations.js",
+    "dev": "npm run build:meditations && wrangler dev",
+    "deploy": "npm run build:meditations && wrangler deploy",
     "preview": "wrangler dev --remote"
   },
   "devDependencies": {

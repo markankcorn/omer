@@ -267,6 +267,22 @@
       margin-bottom: 1.25rem;
     }
 
+    .meditation-body {
+      font-family: var(--font-serif);
+      font-size: 1.05rem;
+      line-height: 1.9;
+      color: var(--text);
+      font-style: italic;
+    }
+
+    .meditation-body p {
+      margin-bottom: 1rem;
+    }
+
+    .meditation-body p:last-child {
+      margin-bottom: 0;
+    }
+
     .divider {
       height: 1px;
       background: var(--border);
@@ -430,6 +446,12 @@
       <div class="transliteration-text" id="count-translit"></div>
       <div class="text-label">English</div>
       <div class="english-text" id="count-english"></div>
+    </section>
+
+    <section class="card animate-in" id="meditation-card" style="display:none">
+      <div class="card-title">Meditation</div>
+      <div class="card-title-hebrew" id="meditation-title-hebrew"></div>
+      <div class="meditation-body" id="meditation-body"></div>
     </section>
 
     <section class="card animate-in">
@@ -722,8 +744,51 @@
         document.getElementById('count-english').textContent = countText.en;
       }
 
+      // ── Meditation loading ──
+      let meditationsData = null;
+
+      async function loadMeditation(day) {
+        const card = document.getElementById('meditation-card');
+        const titleHe = document.getElementById('meditation-title-hebrew');
+        const body = document.getElementById('meditation-body');
+
+        if (!meditationsData) {
+          try {
+            const resp = await fetch('/meditations.json');
+            meditationsData = await resp.json();
+          } catch (e) {
+            card.style.display = 'none';
+            return;
+          }
+        }
+
+        const text = meditationsData[day];
+        if (!text) {
+          card.style.display = 'none';
+          return;
+        }
+
+        const weekIdx = Math.floor((day - 1) / 7);
+        const dayIdx = (day - 1) % 7;
+        titleHe.textContent = SEFIROT[dayIdx].he + ' שֶׁבְּ' + SEFIROT[weekIdx].he;
+
+        // Convert paragraphs
+        body.innerHTML = text.split('\n\n')
+          .filter(p => p.trim())
+          .map(p => '<p>' + p.replace(/\*([^*]+)\*/g, '<em>$1</em>').replace(/—/g, '\u2014') + '</p>')
+          .join('');
+
+        card.style.display = 'block';
+      }
+
       // Initial render
       render();
+
+      // Load meditation for current day
+      const initInfo = getOmerInfo(new Date());
+      if (initInfo.status === 'active') {
+        loadMeditation(initInfo.omerDay);
+      }
 
       // Re-render every minute to handle sunset transitions
       setInterval(render, 60000);
