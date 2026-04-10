@@ -1,5 +1,17 @@
 name = "omercount"
 compatibility_date = "2025-04-01"
+workers_dev = false
+
+[[routes]]
+pattern = "omercount.com/*"
+zone_name = "omercount.com"
+
+[[routes]]
+pattern = "www.omercount.com/*"
+zone_name = "omercount.com"
+
+[build]
+command = "npm run build:meditations"
 
 [assets]
 directory = "./public"
