@@ -40,37 +40,33 @@
     }
 
     /* Starfield background */
-    body::before {
-      content: '';
+    .starfield {
       position: fixed;
       inset: 0;
-      background:
-        radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.7), transparent),
-        radial-gradient(1px 1px at 30% 60%, rgba(255,255,255,0.55), transparent),
-        radial-gradient(1px 1px at 50% 10%, rgba(255,255,255,0.45), transparent),
-        radial-gradient(1px 1px at 70% 40%, rgba(255,255,255,0.6), transparent),
-        radial-gradient(1px 1px at 90% 80%, rgba(255,255,255,0.5), transparent),
-        radial-gradient(1px 1px at 15% 85%, rgba(255,255,255,0.4), transparent),
-        radial-gradient(1px 1px at 45% 50%, rgba(255,255,255,0.55), transparent),
-        radial-gradient(1px 1px at 75% 15%, rgba(255,255,255,0.45), transparent),
-        radial-gradient(1px 1px at 85% 55%, rgba(255,255,255,0.4), transparent),
-        radial-gradient(1.5px 1.5px at 25% 35%, rgba(200,163,78,0.5), transparent),
-        radial-gradient(1.5px 1.5px at 65% 70%, rgba(200,163,78,0.45), transparent),
-        radial-gradient(1.5px 1.5px at 55% 90%, rgba(200,163,78,0.4), transparent);
-      background-size: 200px 200px, 300px 250px, 250px 300px, 350px 200px, 200px 350px,
-                       300px 300px, 250px 250px, 350px 350px, 180px 280px,
-                       400px 400px, 350px 300px, 280px 350px;
       pointer-events: none;
       z-index: 0;
-      animation: starDrift 40s ease-in-out infinite;
+      animation: fieldDrift 120s linear infinite;
     }
 
-    @keyframes starDrift {
+    @keyframes fieldDrift {
       0% { transform: translate(0, 0); }
-      25% { transform: translate(8px, -12px); }
-      50% { transform: translate(-5px, -20px); }
-      75% { transform: translate(6px, -8px); }
-      100% { transform: translate(0, 0); }
+      100% { transform: translate(-60px, -40px); }
+    }
+
+    .star {
+      position: absolute;
+      border-radius: 50%;
+      background: white;
+      animation: twinkle var(--duration) ease-in-out var(--delay) infinite;
+    }
+
+    .star.gold {
+      background: var(--gold-light);
+    }
+
+    @keyframes twinkle {
+      0%, 100% { opacity: var(--min-o); }
+      50% { opacity: var(--max-o); }
     }
 
     /* Gradient overlay */
@@ -499,6 +495,7 @@
   </style>
 </head>
 <body>
+  <div class="starfield" id="starfield"></div>
   <div class="container">
     <header class="animate-in">
       <h1 class="site-title">Counting the Omer</h1>
@@ -1039,6 +1036,27 @@
 
       // Re-render every minute to handle sunset transitions
       setInterval(render, 60000);
+
+      // ── Generate starfield ──
+      (function() {
+        const field = document.getElementById('starfield');
+        const count = 80;
+        for (let i = 0; i < count; i++) {
+          const star = document.createElement('div');
+          const isGold = Math.random() < 0.15;
+          star.className = 'star' + (isGold ? ' gold' : '');
+          const size = isGold ? (1 + Math.random() * 1) : (0.5 + Math.random() * 1.5);
+          star.style.width = size + 'px';
+          star.style.height = size + 'px';
+          star.style.left = Math.random() * 100 + '%';
+          star.style.top = Math.random() * 100 + '%';
+          star.style.setProperty('--duration', (3 + Math.random() * 6) + 's');
+          star.style.setProperty('--delay', (Math.random() * 8) + 's');
+          star.style.setProperty('--min-o', (0.1 + Math.random() * 0.2).toFixed(2));
+          star.style.setProperty('--max-o', (0.5 + Math.random() * 0.5).toFixed(2));
+          field.appendChild(star);
+        }
+      })();
 
       // Blessing card toggle
       document.getElementById('blessing-toggle').addEventListener('click', function() {
