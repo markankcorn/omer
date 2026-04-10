@@ -162,8 +162,29 @@
       font-size: 0.8rem;
       color: var(--text-dim);
       position: relative;
+      margin-bottom: 0.15rem;
+      font-weight: 300;
+    }
+
+    .sunset-line {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      position: relative;
       margin-bottom: 0.25rem;
       font-weight: 300;
+      opacity: 0.7;
+    }
+
+    .sunset-line a {
+      color: var(--gold);
+      text-decoration: none;
+      opacity: 0.8;
+      cursor: pointer;
+      border-bottom: 1px dotted var(--gold);
+    }
+
+    .sunset-line a:hover {
+      opacity: 1;
     }
 
     .day-number {
@@ -426,6 +447,7 @@
     <section class="count-hero animate-in" id="count-hero">
       <div class="count-status" id="count-status">Loading...</div>
       <div class="date-line" id="date-line"></div>
+      <div class="sunset-line" id="sunset-line"></div>
       <div class="day-number loading" id="day-number">&mdash;</div>
       <div class="day-label" id="day-label"></div>
       <div class="week-breakdown" id="week-breakdown"></div>
@@ -582,6 +604,110 @@
       }
 
       // ── Omer Date Calculation ──
+      // ── Sunset calculation ──
+      // NOAA solar calculator (simplified)
+      function calcSunset(date, lat, lng) {
+        const rad = Math.PI / 180;
+        const dayOfYear = Math.floor((date - new Date(date.getFullYear(), 0, 0)) / 86400000);
+        const gamma = (2 * Math.PI / 365) * (dayOfYear - 1);
+
+        // Solar declination (radians)
+        const decl = 0.006918 - 0.399912 * Math.cos(gamma) + 0.070257 * Math.sin(gamma)
+          - 0.006758 * Math.cos(2 * gamma) + 0.000907 * Math.sin(2 * gamma)
+          - 0.002697 * Math.cos(3 * gamma) + 0.00148 * Math.sin(3 * gamma);
+
+        // Equation of time (minutes)
+        const eqTime = 229.18 * (0.000075 + 0.001868 * Math.cos(gamma)
+          - 0.032077 * Math.sin(gamma) - 0.014615 * Math.cos(2 * gamma)
+          - 0.04089 * Math.sin(2 * gamma));
+
+        // Hour angle for sunset (degrees) — uses -0.833° for atmospheric refraction
+        const latRad = lat * rad;
+        const cosHA = (Math.cos(90.833 * rad) / (Math.cos(latRad) * Math.cos(decl)))
+          - Math.tan(latRad) * Math.tan(decl);
+
+        if (Math.abs(cosHA) > 1) return null; // no sunset (polar regions)
+        const ha = Math.acos(cosHA) / rad;
+
+        // Sunset in minutes from midnight UTC
+        // solarNoon = 720 - 4*lng - eqTime (lng east-positive, west-negative)
+        // sunset = solarNoon + ha*4
+        const sunsetUTC = 720 - 4 * lng + 4 * ha - eqTime;
+
+        // Convert to local time (using JS timezone offset)
+        const tzOffset = -date.getTimezoneOffset(); // minutes ahead of UTC
+        const sunsetLocal = sunsetUTC + tzOffset;
+
+        const hours = Math.floor(sunsetLocal / 60);
+        const minutes = Math.round(sunsetLocal % 60);
+        return { hours, minutes, decimal: sunsetLocal / 60 };
+      }
+
+      // Estimate latitude from timezone offset (rough but decent for Omer purposes)
+      function estimateLatLng() {
+        // Use standard time offset (stable year-round, not affected by DST)
+        const jan = new Date(new Date().getFullYear(), 0, 1).getTimezoneOffset();
+        const jul = new Date(new Date().getFullYear(), 6, 1).getTimezoneOffset();
+        const stdOffset = -Math.max(jan, jul) / 60; // standard time hours from UTC
+        // Map by standard time offset to approximate population centers
+        const tzMap = {
+          '-10': { lat: 21, lng: -157 },  // Hawaii
+          '-9': { lat: 61, lng: -150 },   // Alaska
+          '-8': { lat: 37, lng: -122 },   // Pacific / SF
+          '-7': { lat: 40, lng: -105 },   // Mountain / Denver
+          '-6': { lat: 41, lng: -87 },    // Central / Chicago
+          '-5': { lat: 40, lng: -74 },    // Eastern / NYC
+          '-4': { lat: 18, lng: -66 },    // Atlantic / PR
+          '-3': { lat: -23, lng: -43 },   // Brazil
+          '0': { lat: 51, lng: 0 },       // London
+          '1': { lat: 48, lng: 2 },       // Paris
+          '2': { lat: 32, lng: 34 },      // Israel
+          '3': { lat: 55, lng: 37 },      // Moscow
+          '5.5': { lat: 19, lng: 73 },    // India
+          '8': { lat: 31, lng: 121 },     // China
+          '10': { lat: -34, lng: 151 },   // Sydney
+        };
+        const key = String(stdOffset);
+        return tzMap[key] || { lat: 40, lng: -74 }; // default to NYC
+      }
+
+      // Get sunset info — uses saved coords, geolocation, or timezone estimate
+      function getSunsetHour(date) {
+        let lat, lng, precise = false;
+        const saved = localStorage.getItem('omer_location');
+        if (saved) {
+          const loc = JSON.parse(saved);
+          lat = loc.lat;
+          lng = loc.lng;
+          precise = true;
+        } else {
+          const est = estimateLatLng();
+          lat = est.lat;
+          lng = est.lng;
+        }
+        const result = calcSunset(date, lat, lng);
+        if (!result) return { decimal: 19.5, display: '~7:30 PM', precise: false };
+        const h = ((result.hours % 24) + 24) % 24;
+        const m = result.minutes;
+        const ampm = h >= 12 ? 'PM' : 'AM';
+        const h12 = h > 12 ? h - 12 : (h === 0 ? 12 : h);
+        const display = (precise ? '' : '~') + h12 + ':' + String(m).padStart(2, '0') + ' ' + ampm;
+        return { decimal: result.decimal, display, precise };
+      }
+
+      function requestPreciseLocation() {
+        if (!navigator.geolocation) return;
+        navigator.geolocation.getCurrentPosition(function(pos) {
+          localStorage.setItem('omer_location', JSON.stringify({
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude
+          }));
+          render(); // re-render with precise sunset
+        }, function() {
+          // Permission denied — do nothing
+        });
+      }
+
       // Uses Intl.DateTimeFormat with the Hebrew calendar to find 16 Nisan.
       // The Intl API maps Gregorian dates to Hebrew dates using midnight boundaries.
       // 16 Nisan (Intl) corresponds to the Gregorian date whose daytime is 16 Nisan.
@@ -612,11 +738,10 @@
         const omerSunsetStart = new Date(nisan16);
         omerSunsetStart.setDate(omerSunsetStart.getDate() - 1);
 
-        // Approximate sunset at 7:30 PM local time
-        // TODO: use actual sunset time from zip code
-        const APPROX_SUNSET_HOUR = 19.5;
+        // Sunset calculation
+        const sunsetInfo = getSunsetHour(now);
         const currentHour = now.getHours() + now.getMinutes() / 60;
-        const isAfterSunset = currentHour >= APPROX_SUNSET_HOUR;
+        const isAfterSunset = currentHour >= sunsetInfo.decimal;
 
         // Days since Omer sunset-start date
         const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -645,7 +770,7 @@
           // Compute days until Omer starts
           const startDate = new Date(omerSunsetStart);
           const daysUntil = Math.ceil((startDate.getTime() - todayMidnight.getTime()) / 86400000);
-          return { status, daysUntil, omerStartDate: omerSunsetStart };
+          return { status, daysUntil, omerStartDate: omerSunsetStart, sunsetInfo };
         } else if (omerDay > 49) {
           status = 'after';
           return { status };
@@ -656,6 +781,7 @@
             omerDay,
             tonightDay: Math.min(tonightDay, 49),
             isAfterSunset,
+            sunsetInfo,
             weeks: Math.floor(omerDay / 7),
             remainderDays: omerDay % 7,
             totalProgress: omerDay / 49
@@ -672,6 +798,7 @@
         const dayLabelEl = document.getElementById('day-label');
         const countStatusEl = document.getElementById('count-status');
         const dateLineEl = document.getElementById('date-line');
+        const sunsetLineEl = document.getElementById('sunset-line');
         const weekBreakdownEl = document.getElementById('week-breakdown');
         const sefirahSection = document.getElementById('sefirah-section');
         const countCard = document.getElementById('count-card');
@@ -680,6 +807,7 @@
         if (info.status === 'before') {
           countStatusEl.textContent = 'The Omer begins soon';
           dateLineEl.textContent = '';
+          sunsetLineEl.textContent = '';
           dayNumberEl.textContent = info.daysUntil;
           dayNumberEl.classList.remove('active');
           dayLabelEl.textContent = 'day' + (info.daysUntil === 1 ? '' : 's') + ' until counting begins';
@@ -694,6 +822,7 @@
         if (info.status === 'after') {
           countStatusEl.textContent = 'Chag Sameach!';
           dateLineEl.textContent = '';
+          sunsetLineEl.textContent = '';
           dayNumberEl.textContent = '✦';
           dayNumberEl.classList.remove('active');
           dayNumberEl.style.fontSize = '4rem';
@@ -715,6 +844,20 @@
         const dateStr = now.toLocaleDateString('en-US', opts);
         const sunsetNote = info.isAfterSunset ? 'after sunset' : 'before sunset';
         dateLineEl.textContent = 'For ' + dateStr + ' ' + sunsetNote;
+
+        // Sunset time display
+        const si = info.sunsetInfo;
+        if (si.precise) {
+          sunsetLineEl.textContent = 'Sunset today at ' + si.display;
+        } else {
+          sunsetLineEl.innerHTML = 'Sunset today at ' + si.display
+            + ' \u00b7 <a href="#" id="precise-location">use my location for exact time</a>';
+          const link = document.getElementById('precise-location');
+          if (link) link.addEventListener('click', function(e) {
+            e.preventDefault();
+            requestPreciseLocation();
+          });
+        }
         dayNumberEl.textContent = day;
         dayNumberEl.classList.add('active');
         dayNumberEl.classList.remove('loading');
