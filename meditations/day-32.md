@@ -6,3 +6,4 @@ title = "Endurance within Humility"
 title_hebrew = "נֶצַח שֶׁבְּהוֹד"
 +++
 
+

@@ -1,8 +1,9 @@
 +++
 day = 29
 week_sefirah = "Hod"
-day_sefirah = "Chesed"
-title = "Lovingkindness within Humility"
+day_sefirah = "Hesed"
+title = "Love within Humility"
 title_hebrew = "חֶסֶד שֶׁבְּהוֹד"
 +++
+
 

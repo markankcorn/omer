@@ -2,7 +2,8 @@
 day = 47
 week_sefirah = "Malchut"
 day_sefirah = "Hod"
-title = "Humility within Sovereignty"
+title = "Humility within Nobility"
 title_hebrew = "הוֹד שֶׁבְּמַלְכוּת"
 +++
+
 

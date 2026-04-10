@@ -6,3 +6,4 @@ title = "Humility within Foundation"
 title_hebrew = "הוֹד שֶׁבְּיְסוֹד"
 +++
 
+

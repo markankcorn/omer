@@ -1,11 +1,15 @@
 +++
 day = 7
-week_sefirah = "Chesed"
+week_sefirah = "Hesed"
 day_sefirah = "Malchut"
-title = "Sovereignty within Lovingkindness"
+title = "Nobility within Love"
 title_hebrew = "מַלְכוּת שֶׁבְּחֶסֶד"
 +++
 
-*Malchut she'b'Chesed* — Sovereignty within Lovingkindness — calls us to reflect on how we channel our generosity with intention and dignity. Chesed, the overflowing impulse to give, is the foundation of this first week of the Omer. But love without structure can become formless, even overwhelming. Malchut asks us to bring presence and purposefulness to our kindness — to give not from impulse alone, but as a conscious act of leadership over our own hearts.
+Today concludes the first week of our seven week cycle of Counting the Omer, and the last day of our focus on Hesed, love or loving kindness. Malchut is translated as kingship or sovereignty, but nobility is probably the closest in modern English. For the Kabbalists, it represents the final aspect of the Upper Realm and the place where it touches and interfaces with the created world that we inhabit as humans. It's where creation is made manifest and is often identified with the Shekhinah, the feminine nature of the Creator.
 
-Consider today how your acts of lovingkindness carry authority. When you offer compassion, do you do so with the full weight of your being — grounded, deliberate, sovereign? Malchut within Chesed reminds us that true generosity is not passive. It is a royal act, a choice made from a place of inner wholeness. As this first week of the Omer draws to a close, we are invited to stand firmly in our capacity to love — not as servants to our emotions, but as stewards of a kindness that uplifts both giver and receiver.
+So let's get practical. How are you going to make your love manifest in the world? It's all fine and dandy to have emotions, to think longingly about our beloved and ponder all the ways that we are in love. But real love is real — it's in the things we do and the words we say, not the emotions we carry in our hearts that never make it out.
+
+Intentions aren't worth a dime. I'd much rather have someone do the right thing for utterly wrong reasons than have the best intentions of all but do evil. It's our actions that matter most, and yes having solid, pure intentions is the surest way for our actions to be good and right and enduring.
+
+Have the courage to make love real. Risk it, express it, be sincere. Stop hiding and dissembling and dodging. Say what you mean and mean what you say and let the work of the last week come flowing powerfully and honestly into your actions.

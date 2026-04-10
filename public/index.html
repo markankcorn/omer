@@ -45,23 +45,32 @@
       position: fixed;
       inset: 0;
       background:
-        radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.4), transparent),
-        radial-gradient(1px 1px at 30% 60%, rgba(255,255,255,0.3), transparent),
-        radial-gradient(1px 1px at 50% 10%, rgba(255,255,255,0.25), transparent),
-        radial-gradient(1px 1px at 70% 40%, rgba(255,255,255,0.35), transparent),
-        radial-gradient(1px 1px at 90% 80%, rgba(255,255,255,0.3), transparent),
-        radial-gradient(1px 1px at 15% 85%, rgba(255,255,255,0.2), transparent),
-        radial-gradient(1px 1px at 45% 50%, rgba(255,255,255,0.3), transparent),
-        radial-gradient(1px 1px at 75% 15%, rgba(255,255,255,0.25), transparent),
-        radial-gradient(1px 1px at 85% 55%, rgba(255,255,255,0.2), transparent),
-        radial-gradient(1.5px 1.5px at 25% 35%, rgba(200,163,78,0.3), transparent),
-        radial-gradient(1.5px 1.5px at 65% 70%, rgba(200,163,78,0.25), transparent),
-        radial-gradient(1.5px 1.5px at 55% 90%, rgba(200,163,78,0.2), transparent);
+        radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.7), transparent),
+        radial-gradient(1px 1px at 30% 60%, rgba(255,255,255,0.55), transparent),
+        radial-gradient(1px 1px at 50% 10%, rgba(255,255,255,0.45), transparent),
+        radial-gradient(1px 1px at 70% 40%, rgba(255,255,255,0.6), transparent),
+        radial-gradient(1px 1px at 90% 80%, rgba(255,255,255,0.5), transparent),
+        radial-gradient(1px 1px at 15% 85%, rgba(255,255,255,0.4), transparent),
+        radial-gradient(1px 1px at 45% 50%, rgba(255,255,255,0.55), transparent),
+        radial-gradient(1px 1px at 75% 15%, rgba(255,255,255,0.45), transparent),
+        radial-gradient(1px 1px at 85% 55%, rgba(255,255,255,0.4), transparent),
+        radial-gradient(1.5px 1.5px at 25% 35%, rgba(200,163,78,0.5), transparent),
+        radial-gradient(1.5px 1.5px at 65% 70%, rgba(200,163,78,0.45), transparent),
+        radial-gradient(1.5px 1.5px at 55% 90%, rgba(200,163,78,0.4), transparent);
       background-size: 200px 200px, 300px 250px, 250px 300px, 350px 200px, 200px 350px,
                        300px 300px, 250px 250px, 350px 350px, 180px 280px,
                        400px 400px, 350px 300px, 280px 350px;
       pointer-events: none;
       z-index: 0;
+      animation: starDrift 40s ease-in-out infinite;
+    }
+
+    @keyframes starDrift {
+      0% { transform: translate(0, 0); }
+      25% { transform: translate(8px, -12px); }
+      50% { transform: translate(-5px, -20px); }
+      75% { transform: translate(6px, -8px); }
+      100% { transform: translate(0, 0); }
     }
 
     /* Gradient overlay */
@@ -272,7 +281,6 @@
       font-size: 1.05rem;
       line-height: 1.9;
       color: var(--text);
-      font-style: italic;
     }
 
     .meditation-body p {
@@ -483,13 +491,13 @@
 
       // ── Sefirot Data ──
       const SEFIROT = [
-        { he: 'חֶסֶד', en: 'Lovingkindness', tr: 'Chesed' },
-        { he: 'גְּבוּרָה', en: 'Discipline', tr: 'Gevurah' },
-        { he: 'תִּפְאֶרֶת', en: 'Harmony', tr: 'Tiferet' },
+        { he: 'חֶסֶד', en: 'Love', tr: 'Hesed' },
+        { he: 'גְּבוּרָה', en: 'Strength', tr: 'Gevurah' },
+        { he: 'תִּפְאֶרֶת', en: 'Compassion', tr: 'Tiferet' },
         { he: 'נֶצַח', en: 'Endurance', tr: 'Netzach' },
         { he: 'הוֹד', en: 'Humility', tr: 'Hod' },
         { he: 'יְסוֹד', en: 'Foundation', tr: 'Yesod' },
-        { he: 'מַלְכוּת', en: 'Sovereignty', tr: 'Malchut' }
+        { he: 'מַלְכוּת', en: 'Nobility', tr: 'Malchut' }
       ];
 
       // ── Hebrew number data for Omer count ──
