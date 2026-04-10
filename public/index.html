@@ -104,8 +104,7 @@
       font-weight: 300;
       color: var(--gold);
       letter-spacing: 0.15em;
-      text-transform: uppercase;
-      margin-bottom: 0.25rem;
+      margin-top: 0.5rem;
     }
 
     .site-title {
@@ -114,13 +113,6 @@
       font-weight: 700;
       color: var(--text-bright);
       letter-spacing: 0.02em;
-    }
-
-    .site-subtitle {
-      font-size: 0.85rem;
-      color: var(--text-dim);
-      margin-top: 0.5rem;
-      font-weight: 300;
     }
 
     /* Count Display */
@@ -170,7 +162,7 @@
       font-size: 0.75rem;
       color: var(--text-dim);
       position: relative;
-      margin-bottom: 0.25rem;
+      margin-bottom: 2.5rem;
       font-weight: 300;
       opacity: 0.7;
     }
@@ -312,6 +304,76 @@
       margin-bottom: 0;
     }
 
+    .card-collapsible .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .card-collapsible .card-title {
+      margin-bottom: 0.1rem;
+    }
+
+    .collapse-icon {
+      font-size: 0.75rem;
+      color: var(--gold);
+      transition: transform 0.3s ease;
+      opacity: 0.6;
+      margin-left: 1rem;
+    }
+
+    .card-collapsible.open .collapse-icon {
+      transform: rotate(180deg);
+    }
+
+    .card-body {
+      overflow: hidden;
+      transition: max-height 0.4s ease, opacity 0.3s ease;
+      max-height: 1200px;
+      opacity: 1;
+    }
+
+    .card-body.collapsed {
+      max-height: 0;
+      opacity: 0;
+    }
+
+    .card-body .text-label:first-child {
+      margin-top: 1.25rem;
+    }
+
+    .kavvanah {
+      margin-top: 1.25rem;
+      opacity: 0.7;
+    }
+
+    .kavvanah-label {
+      font-size: 0.7rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--text-dim);
+      margin-bottom: 0.75rem;
+    }
+
+    .kavvanah-note {
+      font-weight: 300;
+      text-transform: none;
+      letter-spacing: normal;
+      font-style: italic;
+    }
+
+    .kavvanah-text {
+      font-size: 1.05rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .kavvanah-text:last-child {
+      margin-bottom: 0;
+    }
+
     .divider {
       height: 1px;
       background: var(--border);
@@ -439,9 +501,8 @@
 <body>
   <div class="container">
     <header class="animate-in">
-      <div class="site-title-hebrew">ספירת העומר</div>
       <h1 class="site-title">Counting the Omer</h1>
-      <p class="site-subtitle">From Passover to Shavuot</p>
+      <div class="site-title-hebrew">ספירת העומר</div>
     </header>
 
     <section class="count-hero animate-in" id="count-hero">
@@ -467,6 +528,29 @@
       </div>
     </section>
 
+    <section class="card card-collapsible animate-in" id="blessing-card">
+      <div class="card-header" id="blessing-toggle">
+        <div>
+          <div class="card-title">The Blessing</div>
+          <div class="card-title-hebrew">הַבְּרָכָה</div>
+        </div>
+        <div class="collapse-icon" id="collapse-icon">&#x25BC;</div>
+      </div>
+      <div class="card-body collapsed" id="blessing-body">
+        <div class="kavvanah">
+          <div class="kavvanah-label">Kavvanah <span class="kavvanah-note">(intention, optional)</span></div>
+          <div class="hebrew-text kavvanah-text">הִנְנִי מוּכָן וּמְזוּמָּן לְקַיֵּם מִצְוַת עֲשֵׂה שֶׁל סְפִירַת הָעֹמֶר, כְּמוֹ שֶׁכָּתוּב בַּתּוֹרָה: וּסְפַרְתֶּם לָכֶם מִמָּחֳרַת הַשַּׁבָּת מִיּוֹם הֲבִיאֲכֶם אֶת־עֹמֶר הַתְּנוּפָה שֶׁבַע שַׁבָּתוֹת תְּמִימֹת תִּהְיֶינָה. עַד מִמָּחֳרַת הַשַּׁבָּת הַשְּׁבִיעִת תִּסְפְּרוּ חֲמִשִּׁים יוֹם וְהִקְרַבְתֶּם מִנְחָה חֲדָשָׁה לַה׳.</div>
+          <div class="transliteration-text kavvanah-text">Hineni mukhan u-mezuman le-kayem mitzvat aseh shel sefirat ha-omer, ke-mo she-katuv ba-Torah: U-sefartem lakhem mi-mahorat ha-Shabbat mi-yom havi&rsquo;akhem et omer ha-tenufah, sheva Shabbatot temimot tihyenah. Ad mi-mahorat ha-Shabbat ha-shevi&rsquo;it tisperu hamishim yom, ve-hikravtem minhah hadashah la-Adonai.</div>
+          <div class="english-text kavvanah-text">Behold, I am ready and prepared to fulfill the positive commandment of counting the Omer, as it is written in the Torah: &ldquo;And you shall count for yourselves from the day after the Sabbath, from the day that you brought the omer of the wave-offering, seven complete weeks shall there be. Until the day after the seventh week shall you count fifty days, and you shall offer a new meal-offering to the Lord.&rdquo; (Leviticus 23:15&ndash;16)</div>
+        </div>
+        <div class="divider"></div>
+        <div class="kavvanah-label">The Blessing</div>
+        <div class="hebrew-text">בָּרוּךְ אַתָּה יְיָ אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם, אֲשֶׁר קִדְּשָׁנוּ בְּמִצְוֹתָיו, וְצִוָּנוּ עַל סְפִירַת הָעֹמֶר.</div>
+        <div class="transliteration-text">Baruch atah Adonai, Eloheinu melech ha-olam, asher kid&rsquo;shanu b&rsquo;mitzvotav, v&rsquo;tzivanu al sefirat ha-omer.</div>
+        <div class="english-text">Blessed are You, Lord our God, King of the Universe, who has sanctified us with His commandments and commanded us concerning the counting of the Omer.</div>
+      </div>
+    </section>
+
     <section class="card animate-in" id="count-card" style="display:none">
       <div class="card-title">Tonight&rsquo;s Count</div>
       <div class="card-title-hebrew">הַסְּפִירָה שֶׁל הַלַּיְלָה</div>
@@ -484,16 +568,6 @@
       <div class="meditation-body" id="meditation-body"></div>
     </section>
 
-    <section class="card animate-in">
-      <div class="card-title">The Blessing</div>
-      <div class="card-title-hebrew">הַבְּרָכָה</div>
-      <div class="text-label">Hebrew</div>
-      <div class="hebrew-text">בָּרוּךְ אַתָּה יְיָ אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם, אֲשֶׁר קִדְּשָׁנוּ בְּמִצְוֹתָיו, וְצִוָּנוּ עַל סְפִירַת הָעֹמֶר.</div>
-      <div class="text-label">Transliteration</div>
-      <div class="transliteration-text">Baruch atah Adonai, Eloheinu melech ha-olam, asher kid'shanu b'mitzvotav, v'tzivanu al sefirat ha-omer.</div>
-      <div class="text-label">English</div>
-      <div class="english-text">Blessed are You, Lord our God, King of the Universe, who has sanctified us with His commandments and commanded us concerning the counting of the Omer.</div>
-    </section>
 
     <section class="card explanation animate-in">
       <div class="card-title">About the Omer</div>
@@ -965,6 +1039,14 @@
 
       // Re-render every minute to handle sunset transitions
       setInterval(render, 60000);
+
+      // Blessing card toggle
+      document.getElementById('blessing-toggle').addEventListener('click', function() {
+        const card = document.getElementById('blessing-card');
+        const body = document.getElementById('blessing-body');
+        card.classList.toggle('open');
+        body.classList.toggle('collapsed');
+      });
     })();
   </script>
 </body>
