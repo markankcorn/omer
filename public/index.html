@@ -124,6 +124,35 @@
       letter-spacing: 0.02em;
     }
 
+    .reminder-jump {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 1rem;
+      color: var(--gold-light);
+      text-decoration: none;
+      font-size: 0.85rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      opacity: 0.9;
+    }
+
+    .reminder-jump:hover {
+      opacity: 1;
+    }
+
+    .reminder-jump-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.6rem;
+      height: 1.6rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(200, 163, 78, 0.08);
+      font-size: 0.85rem;
+    }
+
     /* Count Display */
     .count-hero {
       text-align: center;
@@ -441,6 +470,141 @@
     .explanation p:last-child { margin-bottom: 0; }
     .explanation .card-body p:first-child { margin-top: 1.25rem; }
 
+    .signup-card {
+      margin-top: 2rem;
+    }
+
+    .signup-copy {
+      font-size: 0.95rem;
+      color: var(--text);
+      line-height: 1.7;
+      margin-bottom: 1.25rem;
+    }
+
+    .signup-form {
+      display: grid;
+      gap: 1rem;
+      justify-items: center;
+    }
+
+    .signup-grid {
+      display: grid;
+      gap: 0.9rem;
+      justify-items: center;
+      width: 100%;
+    }
+
+    .signup-field {
+      display: grid;
+      gap: 0.45rem;
+    }
+
+    .signup-field span {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--text-dim);
+    }
+
+    .signup-input {
+      width: 100%;
+      border: 1px solid rgba(200, 163, 78, 0.2);
+      background: rgba(10, 15, 35, 0.85);
+      color: var(--text-bright);
+      border-radius: 8px;
+      padding: 0.8rem 0.9rem;
+      font: inherit;
+    }
+
+    .signup-input:focus {
+      outline: none;
+      border-color: rgba(232, 213, 163, 0.65);
+      box-shadow: 0 0 0 3px rgba(200, 163, 78, 0.12);
+    }
+
+    .signup-choice-row {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 0.9rem;
+      flex-wrap: wrap;
+      width: 100%;
+    }
+
+    .signup-field-email {
+      width: min(100%, 36rem);
+    }
+
+    .signup-location-button {
+      min-width: 10.75rem;
+      border: 1px solid rgba(200, 163, 78, 0.2);
+      background: rgba(10, 15, 35, 0.85);
+      color: var(--text-bright);
+      font: inherit;
+      font-weight: 500;
+      border-radius: 8px;
+      padding: 0.82rem 1rem;
+      cursor: pointer;
+      transition: border-color 0.2s ease, background 0.2s ease;
+    }
+
+    .signup-location-button.active {
+      border-color: rgba(232, 213, 163, 0.7);
+      background: rgba(200, 163, 78, 0.12);
+      color: var(--gold-light);
+    }
+
+    .signup-location-button:disabled {
+      opacity: 0.7;
+      cursor: wait;
+    }
+
+    .signup-choice-or {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--text-dim);
+      padding-bottom: 0.75rem;
+    }
+
+    .signup-field-zip {
+      flex: 0 0 8.5rem;
+      width: 8.5rem;
+      min-width: 8.5rem;
+    }
+
+    .signup-button {
+      border: 0;
+      background: linear-gradient(90deg, var(--gold), var(--gold-light));
+      color: var(--bg-deep);
+      font: inherit;
+      font-weight: 600;
+      border-radius: 8px;
+      padding: 0.82rem 1.15rem;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .signup-button:disabled {
+      opacity: 0.7;
+      cursor: wait;
+    }
+
+    .signup-status {
+      min-height: 1.2rem;
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      text-align: center;
+    }
+
+    .signup-status.success {
+      color: var(--gold-light);
+    }
+
+    .signup-status.error {
+      color: #f1b8b8;
+    }
+
     /* Not-active states */
     .off-season {
       text-align: center;
@@ -483,6 +647,12 @@
       .day-label { font-size: 1.2rem; }
       .card { padding: 1.5rem; }
       .hebrew-text { font-size: 1.2rem; }
+      .signup-choice-row { align-items: stretch; }
+      .signup-field-email { width: 100%; }
+      .signup-location-button { width: 100%; }
+      .signup-choice-or { padding-bottom: 0; width: 100%; text-align: center; }
+      .signup-field-zip { min-width: 100%; }
+      .signup-button { width: 100%; }
     }
 
     /* Fade-in animation */
@@ -517,6 +687,10 @@
     <header class="animate-in">
       <h1 class="site-title">Counting the Omer</h1>
       <div class="site-title-hebrew">ספירת העומר</div>
+      <a class="reminder-jump" href="#signup-card">
+        <span class="reminder-jump-icon">✉</span>
+        <span>Evening Reminder</span>
+      </a>
     </header>
 
     <section class="count-hero animate-in" id="count-hero">
@@ -603,6 +777,28 @@
         <p>The Counting of the Omer (<em>Sefirat HaOmer</em>) is a Jewish practice that spans 49 days, linking the holidays of Passover (<em>Pesach</em>) and Shavuot. Beginning on the second night of Passover, Jews count each of the seven weeks, reciting a special blessing followed by the day&rsquo;s count each evening after nightfall. The practice originates in the Torah (Leviticus 23:15&ndash;16), where the Israelites were commanded to count seven complete weeks from the bringing of the <em>omer</em>&mdash;the first sheaf of barley&mdash;offered in the Temple, until the festival of Shavuot, when an offering of wheat was brought.</p>
         <p>This counting period represents a spiritual journey from the physical liberation of the Exodus (Passover) to the spiritual revelation of receiving the Torah at Mount Sinai (Shavuot). In the Kabbalistic tradition, each of the 49 days corresponds to a unique pairing of seven divine attributes (<em>sefirot</em>), offering an opportunity for personal reflection and inner growth. Many also observe certain mourning customs during parts of this period, in remembrance of a plague that struck the students of Rabbi Akiva.</p>
       </div>
+    </section>
+
+    <section class="card animate-in signup-card" id="signup-card">
+      <div class="card-title">Evening Reminder</div>
+      <div class="card-title-hebrew">תזכורת בערב</div>
+      <p class="signup-copy">Get tonight&rsquo;s upcoming count and the meditation essay by email about 30 minutes before sunset.</p>
+      <form class="signup-form" id="signup-form">
+        <div class="signup-grid">
+          <label class="signup-field signup-field-email" for="signup-email">
+            <input class="signup-input" id="signup-email" name="email" type="email" autocomplete="email" placeholder="you@example.com" aria-label="Email" required>
+          </label>
+          <div class="signup-choice-row">
+            <button class="signup-location-button" id="signup-location-button" type="button">Use My Location</button>
+            <div class="signup-choice-or">or</div>
+            <label class="signup-field signup-field-zip" for="signup-zip">
+              <input class="signup-input" id="signup-zip" name="zip" type="text" inputmode="numeric" autocomplete="postal-code" placeholder="ZIP Code" maxlength="10" aria-label="ZIP Code">
+            </label>
+            <button class="signup-button" id="signup-button" type="submit">Sign Up</button>
+          </div>
+        </div>
+        <div class="signup-status" id="signup-status" aria-live="polite"></div>
+      </form>
     </section>
 
     <footer>
@@ -1059,6 +1255,125 @@
 
       // Initial render
       render();
+
+      function setSignupStatus(message, kind) {
+        const status = document.getElementById('signup-status');
+        status.textContent = message || '';
+        status.className = 'signup-status' + (kind ? ' ' + kind : '');
+      }
+
+      function setupSignupForm() {
+        const form = document.getElementById('signup-form');
+        const button = document.getElementById('signup-button');
+        const locationButton = document.getElementById('signup-location-button');
+        const zipInput = document.getElementById('signup-zip');
+        const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        let selectedLocation = null;
+
+        function clearSelectedLocation() {
+          selectedLocation = null;
+          locationButton.classList.remove('active');
+          locationButton.textContent = 'Use My Location';
+        }
+
+        zipInput.addEventListener('input', function() {
+          if (zipInput.value.trim()) {
+            clearSelectedLocation();
+          }
+        });
+
+        locationButton.addEventListener('click', function() {
+          setSignupStatus('', '');
+
+          if (!navigator.geolocation) {
+            setSignupStatus('Location access is not available in this browser.', 'error');
+            return;
+          }
+
+          locationButton.disabled = true;
+          locationButton.textContent = 'Locating...';
+
+          navigator.geolocation.getCurrentPosition(function(position) {
+            selectedLocation = {
+              latitude: position.coords.latitude,
+              longitude: position.coords.longitude
+            };
+            zipInput.value = '';
+            locationButton.disabled = false;
+            locationButton.classList.add('active');
+            locationButton.textContent = 'Location Saved';
+            setSignupStatus('Using your current location for sunset timing.', 'success');
+          }, function(error) {
+            locationButton.disabled = false;
+            locationButton.textContent = 'Use My Location';
+            let message = 'We could not get your location. You can still enter a ZIP code instead.';
+            if (error && error.code === 1) {
+              message = 'Location access was denied. You can still enter a ZIP code instead.';
+            }
+            setSignupStatus(message, 'error');
+          }, {
+            enableHighAccuracy: false,
+            timeout: 10000,
+            maximumAge: 300000
+          });
+        });
+
+        form.addEventListener('submit', async function(event) {
+          event.preventDefault();
+          setSignupStatus('', '');
+
+          const email = document.getElementById('signup-email').value.trim();
+          const zipCode = zipInput.value.trim();
+
+          if (!timeZone) {
+            setSignupStatus('We could not determine your time zone in this browser.', 'error');
+            return;
+          }
+
+          if (!zipCode && !selectedLocation) {
+            setSignupStatus('Use your location or enter a ZIP code first.', 'error');
+            return;
+          }
+
+          button.disabled = true;
+          button.textContent = 'Signing Up...';
+          locationButton.disabled = true;
+
+          try {
+            const response = await fetch('/api/subscriptions', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                email: email,
+                zipCode: zipCode,
+                latitude: zipCode ? null : selectedLocation.latitude,
+                longitude: zipCode ? null : selectedLocation.longitude,
+                timeZone: timeZone
+              })
+            });
+
+            const result = await response.json();
+            if (!response.ok || !result.success) {
+              throw new Error(result.error || 'Could not start your reminder.');
+            }
+
+            form.reset();
+            clearSelectedLocation();
+            selectedLocation = null;
+            setSignupStatus(result.message, 'success');
+          } catch (error) {
+            setSignupStatus(error.message || 'Could not start your reminder.', 'error');
+          } finally {
+            button.disabled = false;
+            button.textContent = 'Sign Up';
+            locationButton.disabled = false;
+          }
+        });
+      }
+
+      setupSignupForm();
 
       // Load meditation for current day
       const initInfo = getOmerInfo(new Date());

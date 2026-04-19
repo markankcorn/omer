@@ -1,6 +1,21 @@
 name = "omercount"
-compatibility_date = "2025-04-01"
+main = "src/worker.js"
+compatibility_date = "2026-04-16"
 workers_dev = false
+
+[[send_email]]
+name = "EMAIL"
+allowed_sender_addresses = ["noreply@omercount.com"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "omercount"
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "./migrations"
+
+[vars]
+SITE_URL = "https://omercount.com"
+EMAIL_FROM = "noreply@omercount.com"
 
 [[routes]]
 pattern = "omercount.com/*"
@@ -15,3 +30,8 @@ command = "npm run build:meditations"
 
 [assets]
 directory = "./public"
+binding = "ASSETS"
+run_worker_first = ["/api/*", "/confirm*", "/unsubscribe*"]
+
+[triggers]
+crons = ["*/15 * * * *"]
