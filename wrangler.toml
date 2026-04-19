@@ -10,7 +10,7 @@ allowed_sender_addresses = ["noreply@omercount.com"]
 [[d1_databases]]
 binding = "DB"
 database_name = "omercount"
-database_id = "00000000-0000-0000-0000-000000000000"
+database_id = "26be2573-043b-4d2c-b804-c926a55613c6"
 migrations_dir = "./migrations"
 
 [vars]
@@ -31,7 +31,7 @@ command = "npm run build:meditations"
 [assets]
 directory = "./public"
 binding = "ASSETS"
-run_worker_first = ["/api/*", "/confirm*", "/unsubscribe*"]
+run_worker_first = ["/api/*", "/confirm", "/unsubscribe"]
 
 [triggers]
 crons = ["*/15 * * * *"]

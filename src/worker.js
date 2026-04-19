@@ -38,6 +38,8 @@ const TZ_LOCATION_MAP = {
 const dateTimeFormatterCache = new Map();
 const hebrewMonthDayFormatterCache = new Map();
 const localDateFormatterCache = new Map();
+const nisan16Cache = new Map();
+const timeZoneValidityCache = new Map();
 
 export default {
   async fetch(request, env) {
@@ -78,10 +80,19 @@ async function routeRequest(request, env) {
   return env.ASSETS.fetch(request);
 }
 
+const SIGNUP_SUCCESS_MESSAGE = 'If that email address is eligible, a confirmation link is on its way. Check your inbox.';
+const SIGNUP_RATE_WINDOW_MS = 60 * 60 * 1000;
+const SIGNUP_RATE_LIMIT = 10;
+
 async function handleSubscriptionSignup(request, env) {
   const body = await safeJson(request);
   if (!body) {
     return json({ success: false, error: 'Please send valid JSON.' }, 400);
+  }
+
+  const ipHash = await hashIp(request.headers.get('cf-connecting-ip') || '');
+  if (!(await recordSignupAttempt(env, ipHash))) {
+    return json({ success: false, error: 'Too many signup attempts. Try again in an hour.' }, 429);
   }
 
   const email = normalizeEmail(body.email);
@@ -133,32 +144,7 @@ async function handleSubscriptionSignup(request, env) {
   const existing = await getSubscriberByEmail(env.DB, email);
 
   if (existing && existing.status === 'active') {
-    await env.DB
-      .prepare(
-        `
-          UPDATE subscribers
-          SET timezone = ?, zip_code = ?, place_name = ?, state_code = ?, latitude = ?, longitude = ?, sunset_mode = ?, reminder_offset_minutes = ?, updated_at = ?
-          WHERE id = ?
-        `,
-      )
-      .bind(
-        timeZone,
-        locationRecord.zipCode,
-        locationRecord.placeName,
-        locationRecord.stateCode,
-        locationRecord.latitude,
-        locationRecord.longitude,
-        locationRecord.sunsetMode,
-        reminderOffsetMinutes,
-        now,
-        existing.id,
-      )
-      .run();
-
-    return json({
-      success: true,
-      message: 'You are already subscribed. Your reminder settings are updated.',
-    });
+    return json({ success: true, message: SIGNUP_SUCCESS_MESSAGE });
   }
 
   const confirmToken = crypto.randomUUID();
@@ -241,10 +227,7 @@ async function handleSubscriptionSignup(request, env) {
     reminderOffsetMinutes,
   });
 
-  return json({
-    success: true,
-    message: 'Check your inbox for a confirmation link to start evening reminders.',
-  });
+  return json({ success: true, message: SIGNUP_SUCCESS_MESSAGE });
 }
 
 async function handleConfirmation(request, env) {
@@ -319,34 +302,31 @@ async function handleUnsubscribe(request, env) {
         );
   }
 
-  const subscriber = await env.DB
-    .prepare('SELECT * FROM subscribers WHERE unsubscribe_token = ? LIMIT 1')
-    .bind(token)
-    .first();
-
-  if (subscriber && subscriber.status !== 'unsubscribed') {
-    await env.DB
-      .prepare('UPDATE subscribers SET status = ?, updated_at = ? WHERE id = ?')
-      .bind('unsubscribed', new Date().toISOString(), subscriber.id)
-      .run();
-  }
-
   if (request.method === 'POST') {
+    const subscriber = await env.DB
+      .prepare('SELECT id, status FROM subscribers WHERE unsubscribe_token = ? LIMIT 1')
+      .bind(token)
+      .first();
+
+    if (subscriber && subscriber.status !== 'unsubscribed') {
+      await env.DB
+        .prepare('UPDATE subscribers SET status = ?, updated_at = ? WHERE id = ?')
+        .bind('unsubscribed', new Date().toISOString(), subscriber.id)
+        .run();
+    }
+
     return new Response('Unsubscribed', { status: 200 });
   }
 
-  return htmlResponse(
-    renderMessagePage({
-      title: 'You are unsubscribed',
-      body: 'Evening Omer reminders are turned off for this address. You can subscribe again anytime from the site.',
-      actionLabel: 'Open omercount.com',
-      actionHref: siteUrl(env),
-    }),
-  );
+  return htmlResponse(renderUnsubscribeConfirmPage(token, siteUrl(env)));
 }
 
 async function handleScheduled(controller, env) {
   const now = new Date(controller.scheduledTime || Date.now());
+  const nowIso = now.toISOString();
+
+  await cleanupStalePending(env, now);
+
   const rows = await env.DB
     .prepare(
       `
@@ -366,8 +346,11 @@ async function handleScheduled(controller, env) {
           status
         FROM subscribers
         WHERE status = 'active'
+          AND (last_sent_at IS NULL OR last_sent_at < ?)
+        LIMIT 1000
       `,
     )
+    .bind(new Date(now.getTime() - 12 * 60 * 60 * 1000).toISOString())
     .all();
 
   const subscribers = rows.results || [];
@@ -384,26 +367,32 @@ async function handleScheduled(controller, env) {
         continue;
       }
 
-      const message = buildReminderEmail(env, subscriber, reminder);
-      await env.EMAIL.send(message);
-
-      await env.DB
+      const claim = await env.DB
         .prepare(
           `
             UPDATE subscribers
             SET last_sent_local_date = ?, last_sent_omer_day = ?, last_sent_at = ?, updated_at = ?
             WHERE id = ?
+              AND (last_sent_local_date IS NULL OR last_sent_local_date <> ?)
           `,
         )
         .bind(
           reminder.localDateKey,
           reminder.omerDay,
-          now.toISOString(),
-          now.toISOString(),
+          nowIso,
+          nowIso,
           subscriber.id,
+          reminder.localDateKey,
         )
         .run();
 
+      if (!claim.meta || claim.meta.changes !== 1) {
+        skipped += 1;
+        continue;
+      }
+
+      const message = buildReminderEmail(env, subscriber, reminder);
+      await env.EMAIL.send(message);
       sent += 1;
     } catch (error) {
       failed += 1;
@@ -411,15 +400,15 @@ async function handleScheduled(controller, env) {
         'scheduled_send_failed',
         JSON.stringify({
           subscriberId: subscriber.id,
-          email: subscriber.email,
           ...serializeError(error),
         }),
       );
 
-      if (error && error.code === 'E_RECIPIENT_SUPPRESSED') {
+      const code = error && error.code;
+      if (code === 'E_RECIPIENT_SUPPRESSED' || code === 'E_DELIVERY_FAILED') {
         await env.DB
           .prepare('UPDATE subscribers SET status = ?, updated_at = ? WHERE id = ?')
-          .bind('suppressed', now.toISOString(), subscriber.id)
+          .bind('suppressed', nowIso, subscriber.id)
           .run();
       }
     }
@@ -428,13 +417,29 @@ async function handleScheduled(controller, env) {
   console.log(
     JSON.stringify({
       event: 'scheduled_complete',
-      at: now.toISOString(),
+      at: nowIso,
       totalSubscribers: subscribers.length,
       sent,
       skipped,
       failed,
     }),
   );
+}
+
+async function cleanupStalePending(env, now) {
+  const cutoff = new Date(now.getTime() - 48 * 60 * 60 * 1000).toISOString();
+  await env.DB
+    .prepare(
+      `DELETE FROM subscribers WHERE status = 'pending' AND confirm_token IS NOT NULL AND created_at < ?`,
+    )
+    .bind(cutoff)
+    .run();
+
+  const rateCutoff = now.getTime() - 24 * 60 * 60 * 1000;
+  await env.DB
+    .prepare('DELETE FROM signup_attempts WHERE at < ?')
+    .bind(rateCutoff)
+    .run();
 }
 
 function getReminderForSubscriber(subscriber, now) {
@@ -471,6 +476,10 @@ function getReminderForSubscriber(subscriber, now) {
   const targetMinutes = sunsetMinutes - reminderOffsetMinutes;
   if (localNow.totalMinutes < targetMinutes) {
     return { shouldSend: false, reason: 'before-target' };
+  }
+
+  if (localNow.totalMinutes > targetMinutes + 60) {
+    return { shouldSend: false, reason: 'past-window' };
   }
 
   const dateLabel = getLocalDateLabel(now, timeZone);
@@ -572,34 +581,17 @@ function buildReminderEmail(env, subscriber, reminder) {
     `Unsubscribe: ${unsubscribeUrl.toString()}`,
   ].join('\n');
 
-  const attachmentBody = [
-    `Tonight after sunset: Day ${day} of the Omer`,
-    countText.en,
-    '',
-    `Sefirah: ${sefirah.english}`,
-    '',
-    meditation || 'No meditation essay is available for tonight.',
-  ].join('\n');
-
   return {
     to: subscriber.email,
     from: { email: env.EMAIL_FROM || DEFAULT_FROM, name: 'Omer Count' },
     subject: `Tonight after sunset: Day ${day} of the Omer`,
     html,
     text,
-    attachments: [
-      {
-        content: new TextEncoder().encode(attachmentBody).buffer,
-        filename: `omer-day-${String(day).padStart(2, '0')}-meditation.txt`,
-        type: 'text/plain; charset=utf-8',
-        disposition: 'attachment',
-      },
-    ],
     headers: {
       'Auto-Submitted': 'auto-generated',
       'List-Unsubscribe': `<${unsubscribeUrl.toString()}>`,
       'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
-      'List-Id': 'Omer Count Reminders <omercount.com>',
+      'List-Id': '<reminders.omercount.com>',
       Precedence: 'list',
       'X-Omer-Day': String(day),
       'X-Omer-Timezone': reminder.timeZone,
@@ -664,6 +656,43 @@ async function sendConfirmationEmail(env, payload) {
       'X-Omer-Confirmation': 'true',
     },
   });
+}
+
+function renderUnsubscribeConfirmPage(token, homeUrl) {
+  const escapedToken = escapeAttribute(token);
+  return `<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex,nofollow">
+    <title>Confirm unsubscribe</title>
+  </head>
+  <body style="margin:0;background:#0b1026;color:#e8e8f0;font-family:Inter,Arial,sans-serif;">
+    <div style="min-height:100vh;padding:32px 16px;display:flex;align-items:center;justify-content:center;">
+      <div style="max-width:640px;width:100%;background:#131836;border:1px solid rgba(200,163,78,0.18);border-radius:16px;padding:32px 24px;text-align:center;">
+        <div style="font-family:Georgia,serif;font-size:34px;line-height:1.1;color:#ffffff;margin-bottom:10px;">Counting the Omer</div>
+        <div style="font-size:13px;letter-spacing:0.18em;text-transform:uppercase;color:#c8a34e;margin-bottom:24px;">ספירת העומר</div>
+        <div style="font-family:Georgia,serif;font-size:28px;line-height:1.2;color:#ffffff;margin-bottom:16px;">Unsubscribe from evening reminders?</div>
+        <div style="font-size:16px;line-height:1.8;color:#c8cad7;margin-bottom:26px;">Click the button to stop receiving evening Omer reminder emails at this address.</div>
+        <form method="POST" action="/unsubscribe?token=${escapedToken}" style="margin:0;">
+          <button type="submit" style="display:inline-block;background:#c8a34e;color:#0b1026;text-decoration:none;font-weight:600;padding:12px 22px;border-radius:8px;border:0;font-size:16px;cursor:pointer;">Unsubscribe</button>
+        </form>
+        <div style="margin-top:18px;">
+          <a href="${escapeAttribute(homeUrl)}" style="color:#9898b0;font-size:14px;text-decoration:none;">Never mind, keep reminders on</a>
+        </div>
+      </div>
+    </div>
+    <script>
+      document.querySelector('form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        fetch(e.target.action, { method: 'POST' }).then(function() {
+          document.body.innerHTML = '<div style="min-height:100vh;padding:32px 16px;display:flex;align-items:center;justify-content:center;"><div style="max-width:640px;width:100%;background:#131836;border:1px solid rgba(200,163,78,0.18);border-radius:16px;padding:32px 24px;text-align:center;"><div style="font-family:Georgia,serif;font-size:28px;color:#ffffff;margin-bottom:16px;">You are unsubscribed</div><div style="font-size:16px;color:#c8cad7;margin-bottom:26px;">Evening Omer reminders are turned off for this address.</div><a href="${escapeAttribute(homeUrl)}" style="display:inline-block;background:#c8a34e;color:#0b1026;text-decoration:none;font-weight:600;padding:12px 22px;border-radius:8px;">Open omercount.com</a></div></div>';
+        });
+      });
+    </script>
+  </body>
+</html>`;
 }
 
 function renderMessagePage({ title, body, actionLabel, actionHref }) {
@@ -741,6 +770,10 @@ function getDayOfYear(localDate) {
 }
 
 function findNisan16Gregorian(year, timeZone) {
+  const cacheKey = `${year}|${timeZone}`;
+  const cached = nisan16Cache.get(cacheKey);
+  if (cached) return cached;
+
   const formatter = getHebrewMonthDayFormatter(timeZone);
 
   for (let month = 3; month <= 5; month += 1) {
@@ -748,7 +781,9 @@ function findNisan16Gregorian(year, timeZone) {
     for (let day = 1; day <= daysInMonth; day += 1) {
       const localNoon = zonedDateTimeToUtc({ year, month, day }, 12, 0, timeZone);
       if (formatter.format(localNoon) === '16 Nisan') {
-        return { year, month, day };
+        const result = { year, month, day };
+        nisan16Cache.set(cacheKey, result);
+        return result;
       }
     }
   }
@@ -985,6 +1020,36 @@ async function getSubscriberByEmail(db, email) {
   return db.prepare('SELECT * FROM subscribers WHERE email = ? LIMIT 1').bind(email).first();
 }
 
+async function hashIp(ip) {
+  if (!ip) return 'anon';
+  const data = new TextEncoder().encode(`omercount-signup|${ip}`);
+  const digest = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(digest))
+    .map((byte) => byte.toString(16).padStart(2, '0'))
+    .join('');
+}
+
+async function recordSignupAttempt(env, ipHash) {
+  const now = Date.now();
+  const windowStart = now - SIGNUP_RATE_WINDOW_MS;
+
+  const result = await env.DB
+    .prepare('SELECT COUNT(*) AS c FROM signup_attempts WHERE ip_hash = ? AND at > ?')
+    .bind(ipHash, windowStart)
+    .first();
+
+  if (result && result.c >= SIGNUP_RATE_LIMIT) {
+    return false;
+  }
+
+  await env.DB
+    .prepare('INSERT INTO signup_attempts (ip_hash, at) VALUES (?, ?)')
+    .bind(ipHash, now)
+    .run();
+
+  return true;
+}
+
 function normalizeEmail(email) {
   return typeof email === 'string' ? email.trim().toLowerCase() : '';
 }
@@ -1015,10 +1080,14 @@ function isValidEmail(email) {
 }
 
 function isValidTimeZone(timeZone) {
+  const cached = timeZoneValidityCache.get(timeZone);
+  if (cached !== undefined) return cached;
   try {
     new Intl.DateTimeFormat('en-US', { timeZone }).format(new Date());
+    timeZoneValidityCache.set(timeZone, true);
     return true;
   } catch {
+    timeZoneValidityCache.set(timeZone, false);
     return false;
   }
 }
@@ -1028,7 +1097,7 @@ function sanitizeLatitude(value) {
   if (!Number.isFinite(number) || number < -90 || number > 90) {
     return null;
   }
-  return Number(number.toFixed(6));
+  return Number(number.toFixed(2));
 }
 
 function sanitizeLongitude(value) {
@@ -1036,7 +1105,7 @@ function sanitizeLongitude(value) {
   if (!Number.isFinite(number) || number < -180 || number > 180) {
     return null;
   }
-  return Number(number.toFixed(6));
+  return Number(number.toFixed(2));
 }
 
 function sanitizeReminderOffset(value) {
