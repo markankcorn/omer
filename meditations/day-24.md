@@ -2,14 +2,14 @@
 day = 24
 week_sefirah = "Netzach"
 day_sefirah = "Tiferet"
-title = "Compassion within Endurance"
+title = "Beauty within Endurance"
 title_hebrew = "תִּפְאֶרֶת שֶׁבְּנֶצַח"
 +++
 
-Whenever the major and minor cycles coincide (hesed of hesed, gevurah of gevurah) like today, we meditate on the true essence of the quality in all its intensity.
+Tiferet is balance, harmony, but the root meaning is *beauty*. A long pursuit that stops being beautiful has already failed, even if it grinds on.
 
-Too often compassion can come from a sense of duty or guilt. I feel bad for how I treated someone, so I'll go out of my way to do something good for that person or someone else, as a way to try to get the scales back into balance. Or I feel like I need to do an act of generosity because it fits my self-image as a good citizen or neighbor or parent.
+Endurance so easily slides towards ugliness. The runner who collapses across the marathon finish line. The founder whose company survives but whose marriage doesn't. We romanticize these people, as though the scars prove the worth of the pursuit. But Beauty sits at the center of the tree for a reason: whatever you're enduring is supposed to stay in proportion. When the pursuit demands that you ignore your relationships, bleed attention from the people you love, ignore the cries of your own body — then it's ugly, out of proportion. That's Netzach without its center.
 
-Cast aside all of that today and try to do a single act of pure compassion. Not from duty or obligation or pride or self-aggrandizement, but just because we are connected each to the other. Our obligation is to give and receive in appropriate measure as we learned yesterday and the day before, and as we'll explore later in the week.
+The test for today is simple. Is the long thing in your life still beautiful? Not glamorous, not easy. Beautiful. Does it still have elegant proportion? Are you still in form while you do it? Are the people around you better off because you're pursuing it, or has it quietly started to take from them? If the honest answer is no, you are not more committed than someone with better balance. You are collapsing inward and calling it devotion.
 
-So ask yourself: Is my compassion whole and complete? Am I trying to build it and expand it every day? Am I free from ulterior motives and external compulsions or am I truly connected to all and to everyone?
+The amateur endures by suffering. The master endures by staying in balance.
